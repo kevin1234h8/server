@@ -139,8 +139,6 @@ app.get("/products", async (req, res) => {
           category: {
             $in: [qCategory],
           },
-          brand: { $in: [qBrand] },
-          price: { $gte: qMinPrice, $lte: qMaxPrice },
         })
           .skip(page * productPerPage)
           .limit(productPerPage);
