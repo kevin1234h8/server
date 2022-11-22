@@ -28,12 +28,7 @@ app.use(
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(
-  cors({
-    origin: URL,
-    credentials: true,
-  })
-);
+app.use(cors());
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -127,7 +122,7 @@ app.get("/products", async (req, res) => {
       })
         .skip(page * productPerPage)
         .limit(productPerPage);
-      res.json(product);
+      res.send(product);
     } else if (page) {
       const product = await Product.find()
         .skip(page * productPerPage)
@@ -176,6 +171,7 @@ app.get("/products", async (req, res) => {
       res.send(product);
     } else {
       const product = await Product.find();
+
       res.send(product);
     }
   } catch (err) {
