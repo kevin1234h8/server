@@ -13,11 +13,12 @@ const stripe = require("stripe")(process.env.stripeKey);
 const URL = "http://localhost:3000";
 const cookieParser = require("cookie-parser");
 const axios = require("axios");
-
+const path = require("path");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 
+app.use(express.static(path.join(__dirname, "client")));
 app.use(cookieParser());
 app.use(
   session({
