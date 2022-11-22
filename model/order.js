@@ -14,3 +14,5 @@ const orderSchema = new mongoose.connect({
     type: Number,
   },
 });
+
+module.exports = mongoose.model("Order", orderSchema);

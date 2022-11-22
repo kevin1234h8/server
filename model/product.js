@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const mongoose_fuzzy_searching = require("mongoose-fuzzy-searching");
 const productSchema = new mongoose.Schema(
   {
     id: {
