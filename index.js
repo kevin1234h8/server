@@ -188,6 +188,10 @@ app.get("/products/:productId", async (req, res) => {
   res.send(singleProduct);
 });
 
+app.get("/", (req, res) => {
+  res.send("Home");
+});
+
 //payment
 
 app.post("/payment", (req, res) => {
@@ -207,6 +211,6 @@ app.post("/payment", (req, res) => {
   );
 });
 
-app.listen(process.env.PORT || 5000, () => {
+app.listen(process.env.PORT || "5000", () => {
   console.log(`the port is running at server`);
 });
