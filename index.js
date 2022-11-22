@@ -18,6 +18,7 @@ const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 
+app.use(express.static(__dirname, "client"));
 app.use(cookieParser());
 app.use(
   session({
@@ -154,7 +155,7 @@ app.get("/products", async (req, res) => {
       }
     } else if (qBrand) {
       const product = await Product.find({
-        brand: { $regex: qBrand, $options: "i" },
+        brand: { $in: [qBrand], $options: "i" },
         price: { $gte: qMinPrice, $lte: qMaxPrice },
       })
         .skip(page * productPerPage)
