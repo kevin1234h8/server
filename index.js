@@ -211,6 +211,8 @@ app.post("/payment", (req, res) => {
   );
 });
 
-app.listen(process.env.PORT || "5000", () => {
+let port = process.env.PORT || 5000;
+
+app.listen(port, () => {
   console.log(`the port is running at server`);
 });
