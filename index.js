@@ -207,6 +207,6 @@ app.post("/payment", (req, res) => {
   );
 });
 
-app.listen(process.env.PORT || 5000, (req, res) => {
-  console.log(`the port is running at server ${process.env.PORT}`);
+app.listen(process.env.PORT || 5000, () => {
+  console.log(`the port is running at server`);
 });
