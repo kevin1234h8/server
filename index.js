@@ -52,20 +52,6 @@ passport.use(
       callbackURL: "/auth/google/callback",
     },
     function (accessToken, refreshToken, profile, done) {
-      // GoogleUser.findOne({ id: profile.id }).then((user) => {
-      //   if (user) {
-      //     done(null, user);
-      //   } else {
-      //     new GoogleUser({
-      //       id: profile.id,
-      //       profile: profile,
-      //     })
-      //       .save()
-      //       .then((newUser) => {
-      //         done(null, newUser);
-      //       });
-      //   }
-      // });
       done(null, profile);
     }
   )
@@ -116,17 +102,6 @@ app.get("/logout", (req, res) => {
 //product
 
 app.post("/product/add", async (req, res) => {
-  // const {
-  //   name,
-  //   price,
-  //   quantity,
-  //   spec,
-  //   category,
-  //   description,
-  //   rating,
-  //   features,
-  // } = req.body;
-
   const newProduct = Product.create(req.body);
   try {
     const saveNewProduct = await newProduct.save();
@@ -232,6 +207,6 @@ app.post("/payment", (req, res) => {
   );
 });
 
-app.listen(process.env.PORT, (req, res) => {
+app.listen(process.env.PORT || 5000, (req, res) => {
   console.log(`the port is running at server ${process.env.PORT}`);
 });
