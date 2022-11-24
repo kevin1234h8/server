@@ -11,9 +11,14 @@ const User = require("./model/user");
 const GoogleUser = require("./model/googleUser");
 const stripe = require("stripe")(process.env.stripeKey);
 const URL = "https://kevin-ecommerce.netlify.app";
+const SubBlog = require("./model/subBlog");
+// const URL = "http://localhost:3000";
+const Blog = require("./model/blog");
 const cookieParser = require("cookie-parser");
 const axios = require("axios");
 const path = require("path");
+const subBlog = require("./model/subBlog");
+const Comment = require("./model/comment");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -34,7 +39,7 @@ app.use(
     credentials: true,
   })
 );
-
+// app.use(cors());
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -124,6 +129,7 @@ app.get("/products", async (req, res) => {
     if (qSearch) {
       const product = await Product.find({
         title: { $regex: qSearch, $options: "i" },
+        category: { $in: [qCategory] },
       })
         .skip(page * productPerPage)
         .limit(productPerPage);
@@ -187,8 +193,80 @@ app.get("/products/:productId", async (req, res) => {
   res.send(singleProduct);
 });
 
+//blog
+
+app.post("/blog/add", async (req, res) => {
+  const newBlog = Blog.create(req.body);
+  try {
+    const saveNewBlog = await newBlog.save();
+    res.send(saveNewBlog);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+
+app.get("/blog", async (req, res) => {
+  try {
+    const blog = await Blog.find();
+    res.send(blog);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+
+//sub blog
+
+app.post("/subBlog/add", async (req, res) => {
+  const newSubBlog = subBlog.create(req.body);
+  try {
+    const saveNewSubBlog = await newSubBlog.save();
+    res.send(saveNewSubBlog);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+
+app.get("/subBlog", async (req, res) => {
+  const subBlogPerPage = req.query.limit || 2;
+  const page = req.query.p || 0;
+  if (subBlogPerPage) {
+    const blog = await SubBlog.find()
+      .skip(page * subBlogPerPage)
+      .limit(subBlogPerPage);
+    res.send(blog);
+  } else {
+    try {
+      const subBlog = await SubBlog.find();
+      res.send(subBlog);
+    } catch (err) {
+      res.status(500).send(err);
+    }
+  }
+});
+
 app.get("/", (req, res) => {
   res.send("Home");
+});
+
+//comment
+
+app.post("/comment/add", async (req, res) => {
+  const newComment = Comment.create(req.body);
+  try {
+    const saveNewComment = await newComment.save();
+    res.send(saveNewComment);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+
+app.get("/comment", async (req, res) => {
+  try {
+    const comment = await Comment.find();
+    res.send(comment);
+  } catch (err) {
+    res.status(500).send(err);
+  }
 });
 
 //payment
