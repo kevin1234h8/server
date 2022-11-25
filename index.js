@@ -103,20 +103,24 @@ app.get("/login/failed/google", (req, res) => {
   res.status(500).send("error");
 });
 
-app.get("/login/success", (req, res) => {
-  if (req.user) {
-    res.status(200).send(req.user);
-  } else {
-    res.status(404).send("user not found");
+app.get("/login/success", async (req, res) => {
+  try {
+    const googleLoginUser = await GoogleUser.find();
+    res.send(googleLoginUser);
+  } catch (err) {
+    res.status(500).send(err);
   }
 });
 
 //logout
 
-app.get("/logout", (req, res) => {
-  req.logOut();
-  res.redirect(URL);
-  return;
+app.get("/logout", async (req, res) => {
+  try {
+    const logout = await GoogleUser.findOneAndRemove().exec();
+    res.send(logout);
+  } catch (err) {
+    res.status(500).send(err);
+  }
 });
 
 //product
