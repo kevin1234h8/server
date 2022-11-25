@@ -5,6 +5,12 @@ const googleUserSchema = new mongoose.Schema(
     id: {
       type: String,
     },
+    displayName: {
+      type: String,
+    },
+    photo: {
+      type: String,
+    },
     profile: Array,
   },
   { timestamps: true }

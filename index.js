@@ -10,9 +10,8 @@ const passport = require("passport");
 const User = require("./model/user");
 const GoogleUser = require("./model/googleUser");
 const stripe = require("stripe")(process.env.stripeKey);
-const URL = "https://kevin-ecommerce.netlify.app";
+const URL = "https://kevin-ecommercesite.netlify.app";
 const SubBlog = require("./model/subBlog");
-// const URL = "http://localhost:3000";
 const Blog = require("./model/blog");
 const cookieParser = require("cookie-parser");
 const axios = require("axios");
@@ -33,6 +32,7 @@ app.use(
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 app.use(
   cors({
     origin: URL,
@@ -54,10 +54,25 @@ passport.use(
     {
       clientID: GOOGLE_CLIENT_ID,
       clientSecret: GOOGLE_CLIENT_SECRET,
-      callbackURL: "/auth/google/callback",
+      callbackURL: "https://kevin-ecommerce.vercel.app/auth/google/callback",
     },
     function (accessToken, refreshToken, profile, done) {
-      done(null, profile);
+      GoogleUser.findOne({ id: profile.id }).then((user) => {
+        if (user) {
+          done(null, user);
+        } else {
+          new GoogleUser({
+            id: profile.id,
+            displayName: profile.displayName,
+            photo: profile.photos[0].value,
+            profile: profile,
+          })
+            .save()
+            .then((newUser) => {
+              done(null, newUser);
+            });
+        }
+      });
     }
   )
 );
@@ -106,7 +121,7 @@ app.get("/logout", (req, res) => {
 
 //product
 
-app.post("/product/add", async (req, res) => {
+app.post("/api/product/add", async (req, res) => {
   const newProduct = Product.create(req.body);
   try {
     const saveNewProduct = await newProduct.save();
@@ -116,7 +131,7 @@ app.post("/product/add", async (req, res) => {
   }
 });
 
-app.get("/products", async (req, res) => {
+app.get("/api/products", async (req, res) => {
   try {
     const productPerPage = req.query.limit || 6;
     const page = req.query.p || 0;
@@ -188,14 +203,14 @@ app.get("/products", async (req, res) => {
   }
 });
 
-app.get("/products/:productId", async (req, res) => {
+app.get("/api/products/:productId", async (req, res) => {
   const singleProduct = await Product.findOne({ id: req.params.productId });
   res.send(singleProduct);
 });
 
 //blog
 
-app.post("/blog/add", async (req, res) => {
+app.post("/api/blog/add", async (req, res) => {
   const newBlog = Blog.create(req.body);
   try {
     const saveNewBlog = await newBlog.save();
@@ -205,7 +220,7 @@ app.post("/blog/add", async (req, res) => {
   }
 });
 
-app.get("/blog", async (req, res) => {
+app.get("/api/blog", async (req, res) => {
   try {
     const blog = await Blog.find();
     res.send(blog);
@@ -216,7 +231,7 @@ app.get("/blog", async (req, res) => {
 
 //sub blog
 
-app.post("/subBlog/add", async (req, res) => {
+app.post("/api/subBlog/add", async (req, res) => {
   const newSubBlog = subBlog.create(req.body);
   try {
     const saveNewSubBlog = await newSubBlog.save();
@@ -226,7 +241,7 @@ app.post("/subBlog/add", async (req, res) => {
   }
 });
 
-app.get("/subBlog", async (req, res) => {
+app.get("/api/subBlog", async (req, res) => {
   const subBlogPerPage = req.query.limit || 2;
   const page = req.query.p || 0;
   if (subBlogPerPage) {
@@ -250,7 +265,7 @@ app.get("/", (req, res) => {
 
 //comment
 
-app.post("/comment/add", async (req, res) => {
+app.post("/api/comment/add", async (req, res) => {
   const newComment = Comment.create(req.body);
   try {
     const saveNewComment = await newComment.save();
@@ -260,7 +275,7 @@ app.post("/comment/add", async (req, res) => {
   }
 });
 
-app.get("/comment", async (req, res) => {
+app.get("/api/comment", async (req, res) => {
   try {
     const comment = await Comment.find();
     res.send(comment);
