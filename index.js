@@ -114,7 +114,7 @@ app.get("/login/success", async (req, res) => {
 
 //logout
 
-app.get("/logout", async (req, res) => {
+app.delete("/logout", async (req, res) => {
   try {
     const logout = await GoogleUser.findOneAndRemove().exec();
     res.send(logout);
