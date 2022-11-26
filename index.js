@@ -22,31 +22,6 @@ const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 
-app.use(cookieParser());
-app.use(
-  session({
-    name: "session",
-    keys: [process.env.keys],
-    maxAge: 24 * 60 * 60 * 1000,
-  })
-);
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-app.use(
-  cors({
-    origin: URL,
-    credentials: true,
-  })
-);
-// app.use(cors());
-app.use(passport.initialize());
-app.use(passport.session());
-
-mongoose.connect(process.env.MONGO_URL).then(() => {
-  console.log("connected");
-});
-
 //login with passport google
 
 passport.use(
@@ -54,25 +29,10 @@ passport.use(
     {
       clientID: GOOGLE_CLIENT_ID,
       clientSecret: GOOGLE_CLIENT_SECRET,
-      callbackURL: "https://kevin-ecommerce.vercel.app/auth/google/callback",
+      callbackURL: "/auth/google/callback",
     },
     function (accessToken, refreshToken, profile, done) {
-      GoogleUser.findOne({ id: profile.id }).then((user) => {
-        if (user) {
-          done(null, user);
-        } else {
-          new GoogleUser({
-            id: profile.id,
-            displayName: profile.displayName,
-            photo: profile.photos[0].value,
-            profile: profile,
-          })
-            .save()
-            .then((newUser) => {
-              done(null, newUser);
-            });
-        }
-      });
+      done(null, profile);
     }
   )
 );
@@ -84,6 +44,33 @@ passport.deserializeUser((user, done) => {
   done(null, user);
 });
 
+app.use(cookieParser());
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use(
+  cors({
+    origin: URL,
+    credentials: true,
+  })
+);
+
+app.use(
+  cookieSession({
+    name: "session",
+    keys: [process.env.keys],
+    maxAge: 24 * 60 * 60 * 1000,
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+mongoose.connect(process.env.MONGO_URL).then(() => {
+  console.log("connected");
+});
+
 app.get(
   "/auth/google",
   passport.authenticate("google", {
@@ -93,10 +80,10 @@ app.get(
 
 app.get(
   "/auth/google/callback",
-  passport.authenticate("google", {
-    successRedirect: URL,
-    failureRedirect: "/login/failed/google",
-  })
+  passport.authenticate("google", { failureRedirect: "/login/failed/google" }),
+  (req, res) => {
+    res.redirect(URL);
+  }
 );
 
 app.get("/login/failed/google", (req, res) => {
@@ -105,8 +92,13 @@ app.get("/login/failed/google", (req, res) => {
 
 app.get("/login/success", async (req, res) => {
   try {
-    const googleLoginUser = await GoogleUser.find();
-    res.send(googleLoginUser);
+    // const googleLoginUser = await GoogleUser.find();
+    // res.send(googleLoginUser);
+    if (req.user) {
+      res.status(200).send(req.user);
+    } else {
+      res.status(404).send("user not found");
+    }
   } catch (err) {
     res.status(500).send(err);
   }
@@ -114,13 +106,9 @@ app.get("/login/success", async (req, res) => {
 
 //logout
 
-app.delete("/logout", async (req, res) => {
-  try {
-    const logout = await GoogleUser.findOneAndRemove().exec();
-    res.send(logout);
-  } catch (err) {
-    res.status(500).send(err);
-  }
+app.get("/logout", async (req, res) => {
+  req.logout();
+  res.redirect(URL);
 });
 
 //product
